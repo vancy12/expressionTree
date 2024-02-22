@@ -13,9 +13,13 @@ void initTree(node **root)
 
 void inorder(node *root)
 {
+    if(root == NULL)
+        return;
+        
     inorder(root->left);
-    printf("%d ", root->character);
+    printf("%c ", root->character);
     inorder(root->right);
+
 }
 
 void push(stackNode **stack, node *input)
@@ -31,7 +35,7 @@ void push(stackNode **stack, node *input)
     return;
 }
 
-node *pop(stackNode **stack)
+node* pop(stackNode **stack)
 {
     if (*stack == NULL)
         return NULL;
@@ -80,7 +84,7 @@ int precedence(char op)
     }
 }
 
-void infixToTree(char *string, node *root)
+void infixToTree(char *string, node **root)
 {
     stackNode *operator;
     stackNode *operand;
@@ -106,7 +110,7 @@ void infixToTree(char *string, node *root)
         {
             node *p = createtreeNode(string[i]);
 
-            while (precedence(peek(operator)->character) <= string[i] && operator!= NULL)
+            while (operator!= NULL && precedence(peek(operator)->character) >= precedence(string[i]))
             {
                 // pop element and create tree
 
@@ -124,15 +128,19 @@ void infixToTree(char *string, node *root)
             push(&operator, p);
         }
 
-        else if (string[i] == ')')
+         else if (string[i] == ')')
         {
             // pop everything and create tree
             while (operator!= NULL)
-            {
+            {   
+                if(peek(operator)->character == '('){
+                    pop(&operator);
+                    break;
+                }
 
                 stringRoot = pop(&operator);
-                operand1 = pop(&operand);
                 operand2 = pop(&operand);
+                operand1 = pop(&operand);
 
                 stringRoot->right = operand2;
 
@@ -143,20 +151,20 @@ void infixToTree(char *string, node *root)
                 push(&operand, stringRoot);
             }
         }
-        // Build the remaining tree
-        while (operator!= NULL)
-        {
-            stringRoot = pop(&operator);
-            operand2 = pop(&operand);
-            operand1 = pop(&operand);
-
-            stringRoot->right = operand2;
-            stringRoot->left = operand1;
-
-            push(&operand, stringRoot);
-        }
-
-        root = pop(&operand);
     }
+    // Build the remaining tree
+    while (operator != NULL)
+    {
+        stringRoot = pop(&operator);
+        operand2 = pop(&operand);
+        operand1 = pop(&operand);
+        // printf("%c %c %c\n", stringRoot->character, operand2->character, operand1->character);
 
+        stringRoot->right = operand2;
+        stringRoot->left = operand1;
+
+        push(&operand, stringRoot);
+    }
+    
+    *root = pop(&operand);
 }   
