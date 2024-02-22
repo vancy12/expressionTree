@@ -121,7 +121,6 @@ void infixToTree(char *string, node *root)
                 // push it back to operand stack
             }
 
-            // if it is -> (
             push(&operator, p);
         }
 
